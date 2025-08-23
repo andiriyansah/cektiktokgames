@@ -1,56 +1,37 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Panel</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    input, button { margin: 5px; padding: 5px; }
-    .box { border: 1px solid #ccc; padding: 10px; margin-top: 10px; }
-  </style>
+  <meta charset="UTF-8" />
+  <title>Admin - Cek Rahasia</title>
 </head>
 <body>
-  <h1>Admin Panel</h1>
-  <div class="box">
-    <h3>Tambah / Update Skor</h3>
-    <input id="nama" placeholder="Nama">
-    <input id="skor" type="number" placeholder="Skor">
-    <button onclick="updateSkor()">Simpan</button>
-  </div>
-
-  <div class="box">
-    <h3>Leaderboard Saat Ini</h3>
-    <ul id="leaderboard"></ul>
-  </div>
+  <h1>Panel Admin</h1>
+  <input id="nama" type="text" placeholder="Masukkan Nama..." />
+  <button onclick="kirim()">Kirim ke Publik</button>
 
   <script>
-    function ambilData() {
-      return JSON.parse(localStorage.getItem("leaderboard") || "[]");
-    }
-    function simpanData(data) {
-      localStorage.setItem("leaderboard", JSON.stringify(data));
-    }
-    function updateSkor() {
-      let nama = document.getElementById("nama").value;
-      let skor = parseInt(document.getElementById("skor").value);
-      if (!nama || isNaN(skor)) return alert("Isi nama dan skor!");
+    const RAHASIA = [
+      "PERNAH CIPOK DI KELAS", 
+      "DULU SIMPAN FOTO CRUSH",
+      "KETAHUAN DOWNLOAD VIDEO", 
+      "CIUM BANTAL SAMBIL BAYANGIN"
+    ];
 
-      let data = ambilData();
-      let index = data.findIndex(d => d.nama === nama);
-      if (index >= 0) {
-        data[index].skor = skor;
-      } else {
-        data.push({ nama, skor });
-      }
-      simpanData(data);
-      tampilkan();
+    function pickSecret() {
+      return RAHASIA[Math.floor(Math.random() * RAHASIA.length)];
     }
-    function tampilkan() {
-      let data = ambilData().sort((a,b)=>b.skor-a.skor);
-      document.getElementById("leaderboard").innerHTML = 
-        data.map(d=>`<li>${d.nama}: ${d.skor}</li>`).join("");
+
+    function kirim() {
+      const nama = document.getElementById("nama").value.trim().toUpperCase();
+      if (!nama) return;
+
+      const secret = pickSecret().toUpperCase();
+      const data = { nama, secret, time: Date.now() };
+
+      localStorage.setItem("rahasiaTerbaru", JSON.stringify(data));
+      alert("✅ Data terkirim ke halaman publik!");
+      document.getElementById("nama").value = "";
     }
-    tampilkan();
   </script>
 </body>
 </html>
