@@ -43,17 +43,15 @@
     import { getDatabase, ref, onChildAdded, limitToLast, query } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
     const firebaseConfig = {
-    apiKey: "AIzaSyAnOP9lM2pdsdWlNhPbDDnf5J04AaAOZd8",
-    authDomain: "tiktokgames-bb0b8.firebaseapp.com",
-    projectId: "tiktokgames-bb0b8",
-    storageBucket: "tiktokgames-bb0b8.firebasestorage.app",
-    messagingSenderId: "194321657662",
-    appId: "1:194321657662:web:9d2053cbc122862784c66f",
-    measurementId: "G-MK7KM3GPNH"
-  };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+            apiKey: "AIzaSyB3Z_kyZWFfuhO2L50Y1vXgJ5rqWsW5rRM",
+            authDomain: "ramalan-live-app.firebaseapp.com",
+            projectId: "ramalan-live-app",
+            storageBucket: "ramalan-live-app.firebasestorage.app",
+            messagingSenderId: "1093061097878",
+            appId: "1:1093061097878:web:f3ab0f0d2384f5d81bc5b7"
+        };
+        const initialAuthToken = null;
+        const appId = firebaseConfig.projectId;
 
     let lastText = "";
     let flipped = false;
