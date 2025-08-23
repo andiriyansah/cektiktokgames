@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Public - Cek Rahasia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Crimson+Pro:wght@500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Crimson Pro', serif;
+      background: radial-gradient(circle at center, #1e1b4b, #0f172a 80%);
+      color: #fefce8;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .card {
+      background: rgba(20, 20, 35, 0.85);
+      border: 2px solid rgba(255, 215, 128, 0.6);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      max-width: 90%;
+      box-shadow: 0 0 25px rgba(255, 215, 128, 0.2);
+    }
+    #nama {
+      font-family: 'Cinzel', serif;
+      font-size: 2.5rem;
+      color: #fcd34d;
+      text-shadow: 0 0 15px rgba(252, 211, 77, 0.6);
+    }
+    #secret {
+      font-size: 2rem;
+      margin-top: 1rem;
+      line-height: 1.4;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+    }
+    .fade-in {
+      animation: fadeIn 1s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .stars {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s infinite ease-in-out;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="stars-container"></div>
+  <div class="card text-center">
+    <h1 id="nama" class="mb-4"></h1>
+    <p id="secret"></p>
+    <button onclick="initVoice()" id="voiceBtn" class="mt-6 bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded-full shadow-lg">🔮 Aktifkan Suara</button>
+  </div>
+
+  <script>
+    let lastText = "";
+    let voiceReady = false;
+    let selectedVoice = null;
+
+    function initVoice() {
+      voiceReady = true;
+      speak("Suara berhasil diaktifkan.");
+      document.getElementById("voiceBtn").style.display = "none";
+    }
+
+    function speak(text) {
+      if (!('speechSynthesis' in window) || !voiceReady) return;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'id-ID';
+      utterance.pitch = 1;
+      utterance.rate = 0.95;
+
+      if (selectedVoice) utterance.voice = selectedVoice;
+
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function loadVoices() {
+      const voices = window.speechSynthesis.getVoices();
+      selectedVoice = voices.find(v => v.lang === 'id-ID' && v.name.toLowerCase().includes('google')) || null;
+    }
+
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+
+    function update() {
+      const raw = localStorage.getItem("rahasiaTerbaru");
+      if (!raw) return;
+      const data = JSON.parse(raw);
+
+      const namaEl = document.getElementById("nama");
+      const secretEl = document.getElementById("secret");
+
+      const combinedText = `${data.nama}, ${data.secret}`;
+      if (combinedText !== lastText) {
+        namaEl.innerText = data.nama;
+        secretEl.innerText = data.secret;
+
+        namaEl.classList.remove("fade-in");
+        secretEl.classList.remove("fade-in");
+        void namaEl.offsetWidth;
+        namaEl.classList.add("fade-in");
+        secretEl.classList.add("fade-in");
+
+        speak(combinedText);
+        lastText = combinedText;
+      }
+    }
+
+    setInterval(update, 1000);
+    update();
+
+    // Tambahkan bintang animasi
+    const starContainer = document.getElementById("stars-container");
+    for (let i = 0; i < 50; i++) {
+      const star = document.createElement("div");
+      star.className = "stars";
+      star.style.top = Math.random() * 100 + "vh";
+      star.style.left = Math.random() * 100 + "vw";
+      star.style.animationDuration = 2 + Math.random() * 3 + "s";
+      starContainer.appendChild(star);
+    }
+  </script>
+</body>
+</html>
