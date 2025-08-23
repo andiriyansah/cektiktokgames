@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cek Rahasia — Output</title>
+  <!-- gunakan CSS & animasi dari kode yang kamu kasih -->
+  <style>
+    /* copy-paste semua CSS dari kode kamu di sini (wrap, card, bg, dsb) */
+  </style>
+</head>
+<body>
+  <div class="bg-canvas" id="bg"></div>
+
+  <div class="wrap">
+    <header>
+      <h1>🎲 Rahasia Kamu</h1>
+      <p>hasil dari input nama</p>
+    </header>
+
+    <section id="card" class="card show">
+      <div id="outName" class="name"></div>
+      <div id="outSecret" class="secret"></div>
+    </section>
+  </div>
+
+  <script>
+    const RAHASIA = [
+      "PERNAH COLI DI WC SEKOLAH",
+      "PERNAH CIUMAN DI BIOSKOP",
+      "DULU SUKA STALKING CRUSH",
+      "KETAHUAN LIKE FOTO MANTAN",
+      "CIUM BANTAL SAMBIL BAYANGIN CRUSH",
+      "KENCAN DI WARUNG INDOMIE"
+      // dst… bisa copy dari list panjangmu
+    ];
+
+    // ambil nama dari query string
+    const params = new URLSearchParams(window.location.search);
+    const nama = (params.get("nama") || "TIDAK DIKETAHUI").toUpperCase();
+
+    // ambil rahasia random
+    const secret = RAHASIA[Math.floor(Math.random() * RAHASIA.length)].toUpperCase();
+
+    // tampilkan
+    document.getElementById("outName").textContent = nama;
+    document.getElementById("outSecret").textContent = secret;
+
+    // suara otomatis
+    const utterance = new SpeechSynthesisUtterance(`${nama}, rahasiamu adalah ${secret}`);
+    utterance.lang = "id-ID";
+    speechSynthesis.speak(utterance);
+
+    // animasi background sama seperti kode kamu
+    const bg = document.getElementById("bg");
+    const COLORS = ["rgba(124,92,255,0.18)","rgba(59,207,145,0.20)","rgba(255,149,128,0.20)","rgba(97,175,254,0.18)","rgba(255,214,102,0.18)"];
+    function spawnSquares(){
+      bg.innerHTML="";
+      const baseCount = window.innerWidth < 420 ? 14 : 22;
+      for(let i=0;i<baseCount;i++){
+        const s=document.createElement("div");
+        s.className="float-square";
+        const size=rand(48,140);
+        const x=rand(-10,100);
+        const dx=rand(-20,30);
+        const dur=rand(18,36);
+        const delay=rand(-dur,0);
+        s.style.width=s.style.height=size+"px";
+        s.style.background=COLORS[i%COLORS.length];
+        s.style.left=x+"vw";
+        s.style.setProperty("--x",x+"vw");
+        s.style.setProperty("--dx",dx+"vw");
+        s.style.setProperty("--dur",dur+"s");
+        s.style.animationDelay=delay+"s";
+        bg.appendChild(s);
+      }
+    }
+    function rand(min,max){return Math.random()*(max-min)+min;}
+    spawnSquares();
+  </script>
+</body>
+</html>
