@@ -1,57 +1,56 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Cek Rahasia — Input</title>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
   <style>
-    body {
-      font-family: Poppins, sans-serif;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-      background:#fdfbff;
-    }
-    .box {
-      text-align:center;
-      background:white;
-      padding:20px;
-      border-radius:12px;
-      box-shadow:0 4px 20px rgba(0,0,0,.08);
-    }
-    input,button {
-      padding:10px 14px;
-      border-radius:8px;
-      border:1px solid #ddd;
-      font-size:16px;
-    }
-    button {
-      margin-left:8px;
-      background:#7c5cff;
-      color:white;
-      border:none;
-      cursor:pointer;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, button { margin: 5px; padding: 5px; }
+    .box { border: 1px solid #ccc; padding: 10px; margin-top: 10px; }
   </style>
 </head>
 <body>
+  <h1>Admin Panel</h1>
   <div class="box">
-    <h2>🎲 Masukkan Nama</h2>
-    <form onsubmit="kirim(event)">
-      <input type="text" id="nama" placeholder="Ketik nama..." required>
-      <button type="submit">Lanjut ➜</button>
-    </form>
+    <h3>Tambah / Update Skor</h3>
+    <input id="nama" placeholder="Nama">
+    <input id="skor" type="number" placeholder="Skor">
+    <button onclick="updateSkor()">Simpan</button>
+  </div>
+
+  <div class="box">
+    <h3>Leaderboard Saat Ini</h3>
+    <ul id="leaderboard"></ul>
   </div>
 
   <script>
-    function kirim(e){
-      e.preventDefault();
-      const nama = document.getElementById("nama").value.trim();
-      if(!nama) return;
-      // arahkan ke output.html dengan query string
-      window.location.href = "output.html?nama=" + encodeURIComponent(nama);
+    function ambilData() {
+      return JSON.parse(localStorage.getItem("leaderboard") || "[]");
     }
+    function simpanData(data) {
+      localStorage.setItem("leaderboard", JSON.stringify(data));
+    }
+    function updateSkor() {
+      let nama = document.getElementById("nama").value;
+      let skor = parseInt(document.getElementById("skor").value);
+      if (!nama || isNaN(skor)) return alert("Isi nama dan skor!");
+
+      let data = ambilData();
+      let index = data.findIndex(d => d.nama === nama);
+      if (index >= 0) {
+        data[index].skor = skor;
+      } else {
+        data.push({ nama, skor });
+      }
+      simpanData(data);
+      tampilkan();
+    }
+    function tampilkan() {
+      let data = ambilData().sort((a,b)=>b.skor-a.skor);
+      document.getElementById("leaderboard").innerHTML = 
+        data.map(d=>`<li>${d.nama}: ${d.skor}</li>`).join("");
+    }
+    tampilkan();
   </script>
 </body>
 </html>
