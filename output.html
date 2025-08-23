@@ -1,30 +1,26 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Public Leaderboard</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; }
-    h1 { margin-bottom: 20px; }
-    ul { list-style: none; padding: 0; }
-    li { padding: 10px; font-size: 20px; border-bottom: 1px solid #ddd; }
-  </style>
+  <meta charset="UTF-8" />
+  <title>Public - Cek Rahasia</title>
 </head>
 <body>
-  <h1>Leaderboard</h1>
-  <ul id="leaderboard"></ul>
+  <h1 id="nama"></h1>
+  <p id="secret"></p>
 
   <script>
-    function ambilData() {
-      return JSON.parse(localStorage.getItem("leaderboard") || "[]");
+    function update() {
+      const raw = localStorage.getItem("rahasiaTerbaru");
+      if (!raw) return;
+      const data = JSON.parse(raw);
+
+      document.getElementById("nama").innerText = data.nama;
+      document.getElementById("secret").innerText = data.secret;
     }
-    function tampilkan() {
-      let data = ambilData().sort((a,b)=>b.skor-a.skor);
-      document.getElementById("leaderboard").innerHTML = 
-        data.map((d,i)=>`<li>${i+1}. ${d.nama} - ${d.skor}</li>`).join("");
-    }
-    tampilkan();
-    setInterval(tampilkan, 2000); // auto refresh tiap 2 detik
+
+    // auto refresh tiap 1 detik
+    setInterval(update, 1000);
+    update();
   </script>
 </body>
 </html>
