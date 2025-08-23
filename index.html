@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Admin - Cek Rahasia</title>
 </head>
 <body>
@@ -9,7 +9,23 @@
   <input id="nama" type="text" placeholder="Masukkan Nama..." />
   <button onclick="kirim()">Kirim ke Publik</button>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+    const firebaseConfig = {
+    apiKey: "AIzaSyAnOP9lM2pdsdWlNhPbDDnf5J04AaAOZd8",
+    authDomain: "tiktokgames-bb0b8.firebaseapp.com",
+    projectId: "tiktokgames-bb0b8",
+    storageBucket: "tiktokgames-bb0b8.firebasestorage.app",
+    messagingSenderId: "194321657662",
+    appId: "1:194321657662:web:9d2053cbc122862784c66f",
+    measurementId: "G-MK7KM3GPNH"
+  };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
     const RAHASIA = [
       "PERNAH CIPOK DI KELAS", 
       "DULU SIMPAN FOTO CRUSH",
@@ -21,17 +37,18 @@
       return RAHASIA[Math.floor(Math.random() * RAHASIA.length)];
     }
 
-    function kirim() {
+    window.kirim = () => {
       const nama = document.getElementById("nama").value.trim().toUpperCase();
       if (!nama) return;
 
       const secret = pickSecret().toUpperCase();
       const data = { nama, secret, time: Date.now() };
 
-      localStorage.setItem("rahasiaTerbaru", JSON.stringify(data));
-      alert("✅ Data terkirim ke halaman publik!");
+      push(ref(db, "rahasia"), data);
+
       document.getElementById("nama").value = "";
-    }
+      alert("✅ Data terkirim ke publik!");
+    };
   </script>
 </body>
 </html>
