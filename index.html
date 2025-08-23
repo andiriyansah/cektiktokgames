@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin - Cek Rahasia</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Cek Rahasia</title>
 </head>
 <body>
-  <h1>Panel Admin</h1>
-  <input id="nama" type="text" placeholder="Masukkan Nama..." />
-  <button onclick="kirim()">Kirim ke Publik</button>
+    <h1>Panel Admin</h1>
+    <input id="nama" type="text" placeholder="Masukkan Nama..." />
+    <button id="kirimBtn">Kirim ke Publik</button>
+    <div id="message"></div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-   const firebaseConfig = {
+        // GANTI INI DENGAN KONFIGURASI PROYEK FIREBASE ANDA!
+        const firebaseConfig = {
             apiKey: "AIzaSyB3Z_kyZWFfuhO2L50Y1vXgJ5rqWsW5rRM",
             authDomain: "ramalan-live-app.firebaseapp.com",
             projectId: "ramalan-live-app",
@@ -24,29 +28,70 @@
         const initialAuthToken = null;
         const appId = firebaseConfig.projectId;
 
-    const RAHASIA = [
-      "PERNAH CIPOK DI KELAS", 
-      "DULU SIMPAN FOTO CRUSH",
-      "KETAHUAN DOWNLOAD VIDEO", 
-      "CIUM BANTAL SAMBIL BAYANGIN"
-    ];
+        const namaInput = document.getElementById("nama");
+        const kirimBtn = document.getElementById("kirimBtn");
+        const messageDiv = document.getElementById("message");
 
-    function pickSecret() {
-      return RAHASIA[Math.floor(Math.random() * RAHASIA.length)];
-    }
+        const RAHASIA = [
+            "PERNAH CIPOK DI KELAS",
+            "DULU SIMPAN FOTO CRUSH",
+            "KETAHUAN DOWNLOAD VIDEO",
+            "CIUM BANTAL SAMBIL BAYANGIN"
+        ];
 
-    window.kirim = () => {
-      const nama = document.getElementById("nama").value.trim().toUpperCase();
-      if (!nama) return;
+        let db;
+        let auth;
+        let userId;
 
-      const secret = pickSecret().toUpperCase();
-      const data = { nama, secret, time: Date.now() };
+        async function initializeAppAndAuth() {
+            if (!firebaseConfig) { showMessage("Konfigurasi Firebase tidak tersedia.", "red"); return; }
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                await onAuthStateChanged(auth, async (user) => {
+                    if (user) { userId = user.uid; } else { const anonymousUser = await signInAnonymously(auth); userId = anonymousUser.user.uid; }
+                });
+                if (initialAuthToken) { await signInWithCustomToken(auth, initialAuthToken); }
+            } catch (e) { console.error("Firebase initialization failed:", e); showMessage("Gagal terhubung ke Firebase.", "red"); }
+        }
 
-      push(ref(db, "rahasia"), data);
+        function pickSecret() {
+            return RAHASIA[Math.floor(Math.random() * RAHASIA.length)];
+        }
 
-      document.getElementById("nama").value = "";
-      alert("✅ Data terkirim ke publik!");
-    };
-  </script>
+        async function kirim() {
+            const nama = namaInput.value.trim().toUpperCase();
+            if (!nama) { showMessage("Nama tidak boleh kosong!", "red"); return; }
+            if (!db || !userId) { showMessage("Koneksi ke database belum siap. Mohon tunggu.", "red"); return; }
+
+            const secret = pickSecret().toUpperCase();
+            const data = { nama: nama, secret: secret, time: Date.now() };
+
+            try {
+                // Menggunakan dokumen `latest-secret` untuk sinkronisasi antar halaman
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/data/latest-secret`);
+                await setDoc(docRef, data);
+                showMessage(`✅ Rahasia terkirim ke halaman publik!`, "green");
+                namaInput.value = "";
+            } catch (e) {
+                console.error("Error writing document: ", e);
+                showMessage("❌ Gagal mengirim rahasia. Coba lagi.", "red");
+            }
+        }
+
+        function showMessage(text, color) {
+            messageDiv.innerText = text;
+            messageDiv.style.color = color;
+            setTimeout(() => { messageDiv.innerText = ""; }, 5000);
+        }
+
+        kirimBtn.addEventListener("click", kirim);
+        namaInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") { kirim(); }
+        });
+
+        document.addEventListener("DOMContentLoaded", initializeAppAndAuth);
+    </script>
 </body>
 </html>
